@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlimited VIP Name Generator</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --primary-color: #0056b3;
+            --card-bg: #fdfdfd;
+            --text-main: #222222;
+            --border-color: #dcdcdc;
+            --result-font-size: 18px; 
+            --accent-gold: #ffb703;
+        }
+
+        /* NEW: Dark Mode Variables */
+        body.dark-mode {
+            --bg-color: #121212;
+            --primary-color: #4da3ff;
+            --card-bg: #1e1e1e;
+            --text-main: #f1f1f1;
+            --border-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s; /* Smooth dark mode transition */
+        }
+
+        .dashboard {
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 12px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between; /* Adjusted for dark mode button */
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s;
+        }
+
+        .font-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+
+        /* NEW: Dark Mode Button */
+        .dark-mode-btn {
+            background-color: var(--text-main);
+            color: var(--bg-color);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* NEW: Game Tabs Styles */
+        .game-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .game-tab {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        .game-tab.active {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+            text-transform: uppercase;
+            background-color: var(--card-bg);
+            color: var(--text-main);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        button.generate-btn {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button.generate-btn:hover {
+            opacity: 0.9;
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .name-card {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideInLeft 0.2s ease-out forwards;
+            transition: background-color 0.3s;
+        }
+
+        @keyframes slideInLeft {
+            0% { opacity: 0; transform: translateX(-30%); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        .generated-name {
+            font-size: var(--result-font-size);
+            font-weight: bold;
+            color: var(--text-main);
+            word-break: break-all;
+            text-align: left;
+            margin-right: 10px;
+        }
+
+        .copy-btn {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 75px;
+            transition: 0.2s;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+        }
+
+        .copy-btn.copied {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+
+        .result-count {
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: var(--text-main);
+            text-align: left;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-box {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 350px;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            animation: popUp 0.3s ease-out;
+            position: relative;
+        }
+
+        @keyframes popUp {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .btn-watch-ad {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-premium {
+            width: 100%;
+            background-color: var(--accent-gold);
+            color: #000;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* NEW: WhatsApp Smart Button Style */
+        .btn-whatsapp {
+            width: 100%;
+            background-color: #25D366;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .qr-image {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 10px auto;
+            display: block;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            object-fit: contain;
+        }
+
+        .contact-info {
+            font-size: 12px;
+            color: #e63946;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            outline: none;
+            text-transform: uppercase;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        .code-input:focus {
+            border-color: var(--accent-gold);
+        }
+
+        /* CUSTOM TOAST NOTIFICATION STYLES */
+        .custom-toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #222;
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            z-index: 2000;
+            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            width: max-content;
+            max-width: 90%;
+        }
+
+        .custom-toast.show {
+            bottom: 30px;
+        }
+
+        .custom-toast.error {
+            border-left: 5px solid #e63946;
+        }
+
+        .custom-toast.success {
+            border-left: 5px solid #2ecc71;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="font-control">
+            <label for="fontSize">FONT SIZE:</label>
+            <input type="range" id="fontSize" min="12" max="35" value="18">
+        </div>
+        <button class="dark-mode-btn" onclick="toggleDarkMode()" id="themeBtn">🌙 DARK</button>
+    </div>
+
+    <div class="container">
+        <div class="game-tabs">
+            <button class="game-tab active" onclick="setGameCategory('ALL', this)">All Mix</button>
+            <button class="game-tab" onclick="setGameCategory('BGMI', this)">BGMI Pro</button>
+            <button class="game-tab" onclick="setGameCategory('FF', this)">Free Fire</button>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="ENTER YOUR NAME HERE...">
+            <button class="generate-btn" onclick="generateUserNames()">GENERATE UNLIMITED NAMES</button>
+        </div>
+
+        <div class="result-count" id="resultCount">Loading styles...</div>
+        <div class="results-container" id="resultsArea"></div>
+    </div>
+
+    <div class="modal-overlay" id="optionsModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeAllModals()">×</button>
+            <h2 class="modal-title">Premium Access</h2>
+            <p class="modal-desc">Watch a quick ad to copy this name, or upgrade for an ad-free experience.</p>
+            
+            <button class="btn-watch-ad" onclick="watchAd()" id="adBtn">
+                ▶ WATCH AD TO COPY
+            </button>
+            
+            <button class="btn-premium" onclick="showPaymentModal()">
+                ⭐ GET PREMIUM (₹50)
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeAllModals()">×</button>
+            <h2 class="modal-title">Unlock VIP</h2>
+            <p class="modal-desc">Scan QR or use the button below to pay ₹50.</p>
+            
+            <img src="31807.jpg" alt="UPI QR Code" class="qr-image">
+            
+            <a href="upi://pay?pa=anshuman9267@okaxis&pn=VIP%20Name%20Generator&am=50&cu=INR" class="btn-premium">
+                📲 OPEN UPI APP TO PAY
+            </a>
+
+            <p class="contact-info">Send payment screenshot here to get your Secret Password👇</p>
+            
+            <button class="btn-whatsapp" onclick="sendSmartWhatsApp()">
+                🟢 SEND AUTO-MESSAGE ON WHATSAPP
+            </button>
+
+            <input type="text" id="secretCodeInput" class="code-input" placeholder="ENTER SECRET PASSWORD">
+
+            <button class="btn-watch-ad" onclick="verifyPremiumCode()" id="verifyBtn">
+                ✅ UNLOCK PREMIUM
+            </button>
+        </div>
+    </div>
+
+    <div id="toastBox" class="custom-toast"></div>
+
+    <script>
+        // NEW: Dark Mode Logic
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.getElementById('themeBtn');
+            if(document.body.classList.contains('dark-mode')) {
+                btn.innerText = "☀️ LIGHT";
+            } else {
+                btn.innerText = "🌙 DARK";
+            }
+        }
+
+        // NEW: Smart WhatsApp Logic
+        function sendSmartWhatsApp() {
+            let userName = document.getElementById('nameInput').value.trim();
+            if(userName === "") userName = "User"; // Default name agar khali choda ho
+            
+            let message = `Hi! I paid ₹50 for Premium on VIP Generator. My name is ${userName}. Please verify and give me my Secret Password!`;
+            // TERA NUMBER YAHAN HAI
+            let waUrl = `https://wa.me/919136383257?text=${encodeURIComponent(message)}`;
+            window.open(waUrl, '_blank');
+        }
+
+        let isPremiumUser = localStorage.getItem('isPremium') === 'true';
+
+        function showNotification(message, type) {
+            const toast = document.getElementById('toastBox');
+            toast.innerText = message;
+            toast.className = 'custom-toast ' + type + ' show';
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        document.getElementById('fontSize').addEventListener('change', function(e) {
+            document.documentElement.style.setProperty('--result-font-size', e.target.value + 'px');
+        });
+
+        // NEW: Game Categories Logic
+        let currentGame = 'ALL';
+        const allPrefixes = ["꧁༒", "★", "☠︎", "༄ᶦᶰᵈ᭄", "亗", "❖", "♔", "⚡", "🔥", "×͜×", "✿", "♛", "★彡", "☆", "⚚", "⚕", "☄", "ᴮᴼˢˢ", "VAMPIRE", "KING", "PRO", "LEGEND", "GOD", "EVIL"];
+        const allSuffixes = ["༒꧂", "★", "☠︎", "࿐", "亗", "❖", "♔", "⚡", "🔥", "×͜×", "✿", "♛", "彡★", "☆", "⚚", "⚕", "☄", "ᴮᴼˢˢ", "YT", "GAMER", "OP", "FF", "999", "007"];
+        
+        // Custom lists for specific games
+        const bgmiPrefixes = ["亗", "❖", "★", "꧁༒", "༄ᶦᶰᵈ᭄", "KING", "PRO"];
+        const bgmiSuffixes = ["亗", "❖", "★", "༒꧂", "࿐", "OP", "GAMER"];
+        
+        const ffPrefixes = ["×͜×", "✿", "☠︎", "ᴮᴼˢˢ", "⚡", "EVIL"];
+        const ffSuffixes = ["×͜×", "✿", "☠︎", "ᴮᴼˢˢ", "FF", "999"];
+
+        const decorators = ["•", "-", "_", "×", "°", "~", "=", "", "»", "«"];
+        const randomBaseNames = ["Ghost", "Raistar", "Joker", "Venom", "Shadow", "Titan", "Beast", "Ninja", "Rolex", "Viper", "Hunter", "Cobra"];
+
+        function setGameCategory(game, btnElement) {
+            currentGame = game;
+            document.querySelectorAll('.game-tab').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            
+            // Re-generate if there's a name, else load random
+            if(document.getElementById('nameInput').value.trim() !== "") {
+                generateUserNames();
+            } else {
+                loadRandomNamesOnStart();
+            }
+        }
+
+        function getActivePrefixes() {
+            if(currentGame === 'BGMI') return bgmiPrefixes;
+            if(currentGame === 'FF') return ffPrefixes;
+            return allPrefixes;
+        }
+
+        function getActiveSuffixes() {
+            if(currentGame === 'BGMI') return bgmiSuffixes;
+            if(currentGame === 'FF') return ffSuffixes;
+            return allSuffixes;
+        }
+
+        let currentNameToCopy = "";
+        let currentButtonElement = null;
+
+        function handleCopyRequest(name, btnElement) {
+            if (isPremiumUser) {
+                executeCopy(name, btnElement);
+            } else {
+                currentNameToCopy = name;
+                currentButtonElement = btnElement;
+                document.getElementById('optionsModal').style.display = 'flex';
+            }
+        }
+
+        function executeCopy(text, btn) {
+            const tempInput = document.createElement("textarea");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            btn.innerText = 'COPIED';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.innerText = 'COPY';
+                btn.classList.remove('copied');
+            }, 1500);
+        }
+
+        function closeAllModals() {
+            document.getElementById('optionsModal').style.display = 'none';
+            document.getElementById('paymentModal').style.display = 'none';
+            document.getElementById('adBtn').innerText = "▶ WATCH AD TO COPY";
+            document.getElementById('secretCodeInput').value = ""; 
+        }
+
+        let isAdWatched = false;
+
+        function watchAd() {
+            const adBtn = document.getElementById('adBtn');
+            
+            // TERA ASLI AD LINK
+            const myAdLink = "https://www.profitablecpmratenetwork.com/cdnbfwk89g?key=05c7fa7c706c335107cf267edb631ab1"; 
+
+            if (isAdWatched) {
+                executeCopy(currentNameToCopy, currentButtonElement);
+                closeAllModals();
+                isAdWatched = false;
+                adBtn.innerText = "▶ WATCH AD TO COPY";
+                adBtn.style.backgroundColor = "var(--primary-color)";
+                return;
+            }
+
+            window.open(myAdLink, '_blank');
+            adBtn.innerText = "⏳ Verifying Ad... (Come back here)";
+            adBtn.style.backgroundColor = "#666"; 
+            
+            document.addEventListener("visibilitychange", function onReturn() {
+                if (!document.hidden) {
+                    adBtn.innerText = "✅ AD VERIFIED! CLICK TO COPY";
+                    adBtn.style.backgroundColor = "#2ecc71"; 
+                    isAdWatched = true; 
+                    document.removeEventListener("visibilitychange", onReturn);
+                }
+            });
+        }
+
+        function showPaymentModal() {
+            document.getElementById('optionsModal').style.display = 'none';
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+
+        // TERA SECRET MATH MAGIC
+        function verifyPremiumCode() {
+            const enteredCode = document.getElementById('secretCodeInput').value.trim().toUpperCase();
+            
+            if(enteredCode === "") {
+                showNotification("Please enter your password first!", "error");
+                return;
+            }
+
+            const match = enteredCode.match(/^([A-Z]+)(\d+)$/);
+
+            if (match) {
+                const namePart = match[1]; 
+                const numberPart = parseInt(match[2]); 
+
+                if (namePart.length * 50 === numberPart) {
+                    showNotification("🎉 Premium Unlocked! Ad-free copy is enabled.", "success");
+                    localStorage.setItem('isPremium', 'true');
+                    isPremiumUser = true;
+                    closeAllModals();
+                    executeCopy(currentNameToCopy, currentButtonElement);
+                    return; 
+                }
+            }
+
+            showNotification("❌ Fake Code! Please pay ₹50 on WhatsApp to get your Real Password.", "error");
+        }
+
+        function renderList(listToRender) {
+            const resultsArea = document.getElementById('resultsArea');
+            const resultCount = document.getElementById('resultCount');
+            const fragment = document.createDocumentFragment();
+            resultsArea.innerHTML = ""; 
+
+            const finalDisplayList = listToRender.slice(0, 1050);
+            resultCount.innerText = `Successfully Generated ${finalDisplayList.length} VIP Styles!`;
+
+            finalDisplayList.forEach((finalName) => {
+                const card = document.createElement('div');
+                card.className = 'name-card';
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'generated-name';
+                nameSpan.innerText = finalName;
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerText = 'COPY';
+                copyBtn.onclick = function() { handleCopyRequest(finalName, copyBtn); };
+                card.appendChild(nameSpan);
+                card.appendChild(copyBtn);
+                fragment.appendChild(card);
+            });
+            resultsArea.appendChild(fragment);
+        }
+
+        function generateUserNames() {
+            const nameInput = document.getElementById('nameInput').value.trim();
+            if (nameInput === "") return;
+            let generatedList = [];
+            
+            let curPrefs = getActivePrefixes();
+            let curSuffs = getActiveSuffixes();
+
+            for (let i = 0; i < curPrefs.length; i++) {
+                for (let j = 0; j < curSuffs.length; j++) {
+                    for (let k = 0; k < decorators.length; k++) {
+                        generatedList.push(`${curPrefs[i]}${decorators[k]}${nameInput}${decorators[k]}${curSuffs[j]}`);
+                    }
+                }
+            }
+            generatedList = generatedList.sort(() => Math.random() - 0.5);
+            renderList(generatedList);
+        }
+
+        function loadRandomNamesOnStart() {
+            let generatedList = [];
+            
+            let curPrefs = getActivePrefixes();
+            let curSuffs = getActiveSuffixes();
+
+            for (let i = 0; i < curPrefs.length; i++) {
+                for (let j = 0; j < curSuffs.length; j++) {
+                    for (let k = 0; k < decorators.length; k++) {
+                        let randomName = randomBaseNames[Math.floor(Math.random() * randomBaseNames.length)];
+                        generatedList.push(`${curPrefs[i]}${decorators[k]}${randomName}${decorators[k]}${curSuffs[j]}`);
+                    }
+                }
+            }
+            generatedList = generatedList.sort(() => Math.random() - 0.5);
+            renderList(generatedList);
+        }
+
+        window.onload = function() {
+            loadRandomNamesOnStart();
+        };
+
+        // ⭐ SECURITY LAYER: ANTI-HACK & ANTI-INSPECT ⭐
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } 
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } 
+        };
+
+    </script>
+</body>
+</html>
